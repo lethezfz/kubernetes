@@ -228,7 +228,7 @@ func (d *DynamicWeight) getRealNodeUsage(nodeName string) (*NodeUsage, error) {
 
 // 统一Prometheus查询方法
 func (d *DynamicWeight) queryPrometheus(query string) (float64, error) {
-	result, _, err := d. (context.Background(), query, time.Now())
+	result, _, err := d.promClient.Query(context.Background(), query, time.Now())
 	if err != nil {
 		return 0, err
 	}
