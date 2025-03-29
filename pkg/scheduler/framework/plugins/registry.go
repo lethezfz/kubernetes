@@ -22,6 +22,7 @@ import (
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/defaultbinder"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/defaultpreemption"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/dynamicresources"
+	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/dynamicweight" //注册dynamicweight
 	plfeature "k8s.io/kubernetes/pkg/scheduler/framework/plugins/feature"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/imagelocality"
 	"k8s.io/kubernetes/pkg/scheduler/framework/plugins/interpodaffinity"
@@ -56,6 +57,8 @@ func NewInTreeRegistry() runtime.Registry {
 		EnableSchedulingQueueHint:                    feature.DefaultFeatureGate.Enabled(features.SchedulerQueueingHints),
 		EnableAsyncPreemption:                        feature.DefaultFeatureGate.Enabled(features.SchedulerAsyncPreemption),
 		EnablePodLevelResources:                      feature.DefaultFeatureGate.Enabled(features.PodLevelResources),
+		//在插件注册代码中误引用了不存在的特性开关（Feature Gate），而自定义调度插件通常不需要特性门控。
+		//EnableDynamicWeight:                          feature.DefaultFeatureGate.Enabled(features.DynamicWeight), //注册dynamicweight
 	}
 
 	registry := runtime.Registry{
@@ -78,6 +81,9 @@ func NewInTreeRegistry() runtime.Registry {
 		defaultbinder.Name:                   defaultbinder.New,
 		defaultpreemption.Name:               runtime.FactoryAdapter(fts, defaultpreemption.New),
 		schedulinggates.Name:                 runtime.FactoryAdapter(fts, schedulinggates.New),
+		dynamicweight.Name:                   runtime.PluginFactory(dynamicweight.New),
+		//dynamicweight.Name:                 runtime.FactoryAdapter(fts, dynamicweight.New), //注册dynamicweight
+		//Kubernetes 要求插件工厂函数必须符合 PluginFactoryWithFts 类型（接收 framework.Framework 参数），但当前实现的 dynamicweight.New 函数使用的是 framework.Handle 参数，导致签名不匹配。
 	}
 
 	return registry

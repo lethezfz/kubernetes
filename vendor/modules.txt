@@ -352,6 +352,8 @@ github.com/karrick/godirwalk
 ## explicit; go 1.12
 # github.com/kr/text v0.2.0
 ## explicit
+# github.com/kylelemons/godebug v1.1.0
+## explicit; go 1.11
 # github.com/libopenstorage/openstorage v1.0.0
 ## explicit
 github.com/libopenstorage/openstorage/api

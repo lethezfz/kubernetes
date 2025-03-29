@@ -37,6 +37,9 @@ type BalancedAllocation struct {
 	resourceAllocationScorer
 }
 
+// 隐式实现：Go 语言中，接口的实现是隐式的，只要类型实现了接口的所有方法，就认为它实现了该接口。
+// 显式检查：通过 var _ 接口类型 = 具体类型实例 的语法，可以在编译时检查类型是否实现了接口。
+// 作用：确保代码的正确性，提高可读性，避免运行时错误
 var _ framework.PreScorePlugin = &BalancedAllocation{}
 var _ framework.ScorePlugin = &BalancedAllocation{}
 
@@ -171,3 +174,15 @@ func balancedResourceScorer(requested, allocable []int64) int64 {
 	// multiplying it with `MaxNodeScore` provides the scaling factor needed.
 	return int64((1 - std) * float64(framework.MaxNodeScore))
 }
+
+//balanced_allocation.go
+//├── 结构体定义
+//├── 接口实现检查
+//├── 状态管理
+//│   ├── PreScore状态存储
+//│   └── 状态读取
+//├── 插件生命周期方法
+//│   ├── PreScore
+//│   └── Score
+//├── 工厂函数
+//└── 核心算法

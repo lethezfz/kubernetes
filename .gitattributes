@@ -1,5 +1,8 @@
 # Always check-out / check-in files with LF line endings.
 * text=auto eol=lf
+*.go text eol=lf
+*.mod text eol=lf
+*.sh text eol=lf
 
 hack/verify-flags/known-flags.txt merge=union
 test/test_owners.csv merge=union

@@ -21,6 +21,7 @@ const (
 	DefaultBinder                   = "DefaultBinder"
 	DefaultPreemption               = "DefaultPreemption"
 	DynamicResources                = "DynamicResources"
+	DynamicWeight                   = "DynamicWeight" //新注册
 	ImageLocality                   = "ImageLocality"
 	InterPodAffinity                = "InterPodAffinity"
 	NodeAffinity                    = "NodeAffinity"

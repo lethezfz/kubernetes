@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/kubernetes/pkg/scheduler/framework"
+	//"k8s.io/kubernetes/pkg/scheduler/framework/plugins/dynamicweight" //注册dynamicweight
 	plfeature "k8s.io/kubernetes/pkg/scheduler/framework/plugins/feature"
 	"sigs.k8s.io/yaml"
 )

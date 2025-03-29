@@ -146,10 +146,10 @@ function add_staging_replace_directives() {
   local path_to_staging_k8s_io="$1"
   # Prune
   go mod edit -json \
-      | jq -r '.Require[]? | select(.Version == "v0.0.0")                 | "-droprequire \(.Path)"' \
+      | jq -r '.Require[]? | select(.Version == "v0.0.0") | "-droprequire \(.Path)"' | tr -d '\r' \
       | xargs -L 100 go mod edit -fmt
   go mod edit -json \
-      | jq -r '.Replace[]? | select(.New.Path | startswith("'"${path_to_staging_k8s_io}"'")) | "-dropreplace \(.Old.Path)"' \
+      | jq -r '.Replace[]? | select(.New.Path | startswith("'"${path_to_staging_k8s_io}"'")) | "-dropreplace \(.Old.Path)"' | tr -d '\r' \
       | xargs -L 100 go mod edit -fmt
   # Re-add
   kube::util::list_staging_repos \
@@ -207,7 +207,7 @@ kube::log::status "go.mod: go work use" >&11
   fi
   # Prune use directives
   go work edit -json \
-      | jq -r '.Use[]? | "-dropuse \(.DiskPath)"' \
+      | jq -r '.Use[]? | "-dropuse \(.DiskPath)"' | tr -d '\r' \
       | xargs -L 100 go work edit -fmt
   # Ensure go and godebug directives
   go work edit -go "${go_directive_value}" -godebug "${godebug_directive_value}"
@@ -250,8 +250,8 @@ for repo in $(kube::util::list_staging_repos); do
 
     # drop all unused replace directives
     comm -23 \
-      <(go mod edit -json | jq -r '.Replace[] | .Old.Path' | sort) \
-      <(go list -m -json all | jq -r 'select(.Main | not) | .Path' | sort) |
+      <(go mod edit -json | jq -r '.Replace[] | .Old.Path'  | tr -d '\r' | sort) \
+      <(go list -m -json all | jq -r 'select(.Main | not) | .Path' | tr -d '\r'| sort) |
     while read -r X; do echo "-dropreplace=${X}"; done |
     xargs -L 100 go mod edit -fmt
 
@@ -262,8 +262,8 @@ done
 echo "=== pruning root"
 # drop unused replace directives other than to local paths
 comm -23 \
-  <(go mod edit -json | jq -r '.Replace[] | select(.New.Path | startswith("./") | not) | .Old.Path' | sort) \
-  <(go list -m -json all | jq -r 'select(.Main | not) | .Path' | sort) |
+  <(go mod edit -json | jq -r '.Replace[] | select(.New.Path | startswith("./") | not) | .Old.Path' | tr -d '\r' | sort) \
+  <(go list -m -json all | jq -r 'select(.Main | not) | .Path' | tr -d '\r' | sort) |
 while read -r X; do echo "-dropreplace=${X}"; done |
 xargs -L 100 go mod edit -fmt
 

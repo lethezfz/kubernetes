@@ -1,0 +1,145 @@
+# dynamic-scheduler-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dynamic-weight-config
+  namespace: kube-system
+data:
+  # 调度器主配置文件
+  scheduler-config.yaml: |
+    apiVersion: kubescheduler.config.k8s.io/v1
+    kind: KubeSchedulerConfiguration
+    leaderElection:
+      leaderElect: true  # 启用领导者选举
+      resourceLock: leases  # 使用Lease锁机制
+      resourceName: dynamic-scheduler-lock  # 锁资源唯一标识
+      resourceNamespace: kube-system  # 锁所在命名空间
+
+    # 调度器实例配置
+    profiles:
+      - schedulerName: dynamic-scheduler  # 调度器唯一标识
+        plugins:
+          # 评分插件配置
+          score:
+            enabled:
+              - name: DynamicWeight  # 启用自定义插件
+                weight: 1  # 插件权重（影响最终评分计算比例）
+            disabled:
+              - name: "*"  # 禁用所有其他评分插件
+
+        # 插件参数配置
+        pluginConfig:
+          - name: DynamicWeight  # 必须与注册的插件名一致
+            args:
+              # 默认权重（当Pod未指定任何标签时生效）
+              defaultWeights:
+                cpu: 0.25
+                memory: 0.25
+                diskio: 0.25
+                netio: 0.25
+
+              # 标签权重规则表（需与代码逻辑完全匹配）
+              labelWeights:
+                # 单一标签规则
+                "cpu-prefer":
+                  cpu: 0.7
+                  memory: 0.1
+                  diskio: 0.1
+                  netio: 0.1
+
+                "mem-prefer":
+                  cpu: 0.1
+                  memory: 0.7
+                  diskio: 0.1
+                  netio: 0.1
+
+                "diskio-prefer":
+                  cpu: 0.1
+                  memory: 0.1
+                  diskio: 0.7
+                  netio: 0.1
+
+                "netio-prefer":
+                  cpu: 0.1
+                  memory: 0.1
+                  diskio: 0.1
+                  netio: 0.7
+
+                # 组合标签规则（最多两个标签组合）
+                "cpu-prefer_mem-prefer":
+                  cpu: 0.5
+                  memory: 0.3
+                  diskio: 0.1
+                  netio: 0.1
+
+                "cpu-prefer_diskio-prefer":
+                  cpu: 0.5
+                  memory: 0.1
+                  diskio: 0.3
+                  netio: 0.1
+
+                "cpu-prefer_netio-prefer":
+                  cpu: 0.5
+                  memory: 0.1
+                  diskio: 0.1
+                  netio: 0.3
+
+                "mem-prefer_diskio-prefer":
+                  cpu: 0.1
+                  memory: 0.5
+                  diskio: 0.3
+                  netio: 0.1
+
+                "mem-prefer_netio-prefer":
+                  cpu: 0.1
+                  memory: 0.5
+                  diskio: 0.1
+                  netio: 0.3
+
+                "diskio-prefer_netio-prefer":
+                  cpu: 0.1
+                  memory: 0.1
+                  diskio: 0.5
+                  netio: 0.3
+  ###
+  config.json: |
+    {
+      "defaultWeights": {
+        "cpu": 0.25,
+        "memory": 0.25,
+        "diskio": 0.25,
+        "netio": 0.25
+      },
+      "labelWeights": {
+        "cpu-prefer": {
+          "cpu": 0.7, "memory": 0.1, "diskio": 0.1, "netio": 0.1
+        },
+        "mem-prefer": {
+          "cpu": 0.1, "memory": 0.7, "diskio": 0.1, "netio": 0.1
+        },
+        "diskio-prefer": {
+          "cpu": 0.1, "memory": 0.1, "diskio": 0.7, "netio": 0.1
+        },
+        "netio-prefer": {
+          "cpu": 0.1, "memory": 0.1, "diskio": 0.1, "netio": 0.7
+        },
+        "cpu-prefer_netio-prefer": {
+          "cpu": 0.5, "memory": 0.1, "diskio": 0.1, "netio": 0.3
+        },
+        "cpu-prefer_mem-prefer": {
+          "cpu": 0.5, "memory": 0.3, "diskio": 0.1, "netio": 0.1
+        },
+        "cpu-prefer_diskio-prefer": {
+          "cpu": 0.5, "memory": 0.1, "diskio": 0.3, "netio": 0.1
+        },
+        "mem-prefer_netio-prefer": {
+          "cpu": 0.1, "memory": 0.1, "diskio": 0.1, "netio": 0.3
+        },
+        "mem-prefer_diskio-prefer": {
+          "cpu": 0.1, "memory": 0.5, "diskio": 0.3, "netio": 0.1
+        },
+        "diskio-prefer_netio-prefer": {
+          "cpu": 0.1, "memory": 0.1, "diskio": 0.5, "netio": 0.3
+        }
+      }
+    }
